@@ -12,6 +12,8 @@ const Admin = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingRole, setCheckingRole] = useState(true);
   const [currentCrashPoint, setCurrentCrashPoint] = useState<number | null>(null);
+  const [crashHistory, setCrashHistory] = useState<number[]>([]);
+  const [nextCrashPoint, setNextCrashPoint] = useState<number | null>(null);
   const [upcomingPredictions, setUpcomingPredictions] = useState<number[]>([]);
   const [recentBets, setRecentBets] = useState<{ bet_amount: number; cashout_multiplier: number | null; crashed: boolean; profit: number; created_at: string }[]>([]);
   const [stats, setStats] = useState({ totalBets: 0, totalWagered: 0, totalProfit: 0, activeUsers: 0 });
