@@ -65,7 +65,19 @@ const Admin = () => {
 
   useEffect(() => {
     const handler = (e: Event) => {
-      setCurrentCrashPoint((e as CustomEvent).detail);
+      const cp = (e as CustomEvent).detail;
+      // When a new crash point is revealed, the previous "next" becomes current
+      // and we log the previous current to history
+      setCurrentCrashPoint(prev => {
+        if (prev !== null) {
+          setCrashHistory(h => [Math.round(prev * 100) / 100, ...h].slice(0, 50));
+        }
+        return cp;
+      });
+      // Pre-generate the next crash point using same algorithm as the game
+      const r = Math.random();
+      const next = Math.min(Math.max(1.0, 1 / (1 - r) * 0.97), 100);
+      setNextCrashPoint(Math.round(next * 100) / 100);
     };
     window.addEventListener("admin-crash-point", handler);
     return () => window.removeEventListener("admin-crash-point", handler);
