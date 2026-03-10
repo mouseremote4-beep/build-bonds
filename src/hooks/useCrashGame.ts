@@ -51,18 +51,18 @@ export function useCrashGame() {
 
   // Pre-generated queue of upcoming crash points
   const crashQueueRef = useRef<number[]>([]);
-  const adminQueueRef = useRef<number[]>([]);
+  const adminCrashPointRef = useRef<number | null>(null);
 
-  // Listen for admin-injected crash points
+  // Listen for admin-set crash point (single override, not queue)
   useEffect(() => {
     const handleSet = (e: Event) => {
       const { crashPoint } = (e as CustomEvent).detail;
-      adminQueueRef.current.push(crashPoint);
-      console.log("[CrashGame] Admin queued crash point:", crashPoint);
+      adminCrashPointRef.current = crashPoint;
+      console.log("[CrashGame] Admin set next crash point:", crashPoint);
     };
     const handleClear = () => {
-      adminQueueRef.current = [];
-      console.log("[CrashGame] Admin cleared crash point queue");
+      adminCrashPointRef.current = null;
+      console.log("[CrashGame] Admin cleared crash point");
     };
     window.addEventListener("admin-set-crash-point", handleSet);
     window.addEventListener("admin-clear-crash-points", handleClear);
@@ -79,9 +79,13 @@ export function useCrashGame() {
   };
 
   const getNextCrashPoint = () => {
-    // Admin-set crash points take priority
-    if (adminQueueRef.current.length > 0) {
-      return adminQueueRef.current.shift()!;
+    // Admin override takes priority, then clears after use
+    if (adminCrashPointRef.current !== null) {
+      const cp = adminCrashPointRef.current;
+      adminCrashPointRef.current = null;
+      // Notify admin UI that prediction was consumed
+      window.dispatchEvent(new CustomEvent("admin-prediction-consumed"));
+      return cp;
     }
     ensureCrashQueue();
     return crashQueueRef.current.shift()!;
