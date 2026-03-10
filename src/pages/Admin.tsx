@@ -153,24 +153,12 @@ const Admin = () => {
     }
 
     try {
-      const { data: existing } = await supabase
-        .from("balances")
-        .select("amount")
-        .eq("user_id", creditUserId)
-        .maybeSingle();
+      const { data, error } = await supabase.functions.invoke("admin-credit-user", {
+        body: { target_user_id: creditUserId, amount },
+      });
 
-      if (existing) {
-        const { error } = await supabase
-          .from("balances")
-          .update({ amount: Number(existing.amount) + amount })
-          .eq("user_id", creditUserId);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("balances")
-          .insert({ user_id: creditUserId, amount });
-        if (error) throw error;
-      }
+      if (error) throw new Error(error.message || "Failed to credit user");
+      if (data?.error) throw new Error(data.error);
 
       toast.success(`Credited KES ${amount} to user`);
       setCreditUserId("");
