@@ -74,10 +74,13 @@ const Admin = () => {
         }
         return cp;
       });
-      // Pre-generate the next crash point using same algorithm as the game
-      const r = Math.random();
-      const next = Math.min(Math.max(1.0, 1 / (1 - r) * 0.97), 100);
-      setNextCrashPoint(Math.round(next * 100) / 100);
+      // Pre-generate next 5 crash points
+      const points: number[] = [];
+      for (let i = 0; i < 5; i++) {
+        const r = Math.random();
+        points.push(Math.round(Math.min(Math.max(1.0, 1 / (1 - r) * 0.97), 100) * 100) / 100);
+      }
+      setNextCrashPoints(points);
     };
     window.addEventListener("admin-crash-point", handler);
     return () => window.removeEventListener("admin-crash-point", handler);
